@@ -11,17 +11,34 @@ import android.widget.TextView;
 
 import org.w3c.dom.Text;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link BookDetailsFragment#newInstance} factory method to
- * create an instance of this fragment.
- *
- */
+
 public class BookDetailsFragment extends Fragment {
 
+    private static final String ARG_BOOK = "param1";
+    private Book book;
+
+    TextView title;
+    TextView author;
 
     public BookDetailsFragment() {
         // Required empty public constructor
+    }
+
+    public static BookDetailsFragment newInstance(Book book) {
+        BookDetailsFragment fragment = new BookDetailsFragment();
+        Bundle args = new Bundle();
+        args.putParcelable(ARG_BOOK, book);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        if (getArguments() != null) {
+            book = getArguments().getParcelable(ARG_BOOK);
+        }
     }
 
 
@@ -31,9 +48,20 @@ public class BookDetailsFragment extends Fragment {
         // Inflate the layout for this fragment
         View layout = inflater.inflate(R.layout.fragment_book_details, container, false);
 
-        TextView title = layout.findViewById(R.id.Title);
-        TextView author = layout.findViewById((R.id.Author));
+        if (layout != null){
+            title = layout.findViewById(R.id.Title);
+            author = layout.findViewById(R.id.Author);
+        }
+
+        if (book != null){
+            changeBook(book);
+        }
 
         return layout;
+    }
+
+    public void changeBook(Book book){
+        title.setText(book.getTitle());
+        author.setText(book.getAuthor());
     }
 }
