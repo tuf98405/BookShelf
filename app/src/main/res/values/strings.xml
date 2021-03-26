@@ -1,7 +1,6 @@
 <resources>
     <string name="app_name">BookShelf</string>
-    <string-array
-        name="titles">
+    <string-array name="titles">
         <item>The Very Real Title</item>
         <item>This is also a Very Real Title</item>
         <item>The Great Berd Escape</item>
@@ -13,8 +12,7 @@
         <item>This is a Sponsored Book</item>
         <item>The Greatest Hostage Situation</item>
     </string-array>
-    <string-array
-        name="authors">
+    <string-array name="authors">
         <item>The Very Real Author</item>
         <item>The Very Real Authors Brother</item>
         <item>Berd</item>
@@ -26,6 +24,6 @@
         <item>Raid Shadow Legends</item>
         <item>Still ludwig</item>
     </string-array>
-<!-- TODO: Remove or change this placeholder text -->
+    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
