@@ -47,7 +47,7 @@ public class BookAdapter extends ArrayAdapter {
 
         if (convertView == null) {
             textView = new TextView(parent.getContext());
-            textView.setTextSize(20);
+            textView.setTextSize(40);
         } else {
             textView = (TextView) convertView;
         }

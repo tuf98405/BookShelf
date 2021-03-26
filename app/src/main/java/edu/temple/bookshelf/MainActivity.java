@@ -13,11 +13,13 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
 
     FragmentManager fragmentManager;
     FragmentTransaction fragmentTransaction;
-    book_list booklist;
+    book_list bookListFragment;
     BookList bookList;
 
     BookDetailsFragment bookDetailsFragment;
     boolean exists;
+    boolean selected;
+    int prevpos;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,6 +27,7 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
         setContentView(R.layout.activity_main);
 
         exists = findViewById(R.id.container2) != null;
+
 
         bookList = new BookList();
 
@@ -35,10 +38,20 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
             bookList.add(new Book(titles[i], authors[i]));
         }
 
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.container, booklist.newInstance(bookList))
-                .commit();
+
+        if (selected){
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.container, bookDetailsFragment.newInstance(bookList.get(prevpos)))
+                    .commit();
+        }else {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.container, bookListFragment.newInstance(bookList))
+                    .commit();
+            selected = false;
+        }
+
 
         if (exists) {
             bookDetailsFragment = new BookDetailsFragment();
@@ -49,11 +62,12 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
                     .replace(R.id.container2, bookDetailsFragment)
                     .commit();
         }
-
     }
 
     @Override
     public void itemClicked(int position){
+        selected = true;
+        prevpos = position;
         if (!exists){
             getSupportFragmentManager()
                     .beginTransaction()
@@ -63,5 +77,6 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
         } else {
             bookDetailsFragment.changeBook(bookList.get(position));
         }
+
     }
 }
