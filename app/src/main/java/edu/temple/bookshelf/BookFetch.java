@@ -1,7 +1,7 @@
 package edu.temple.bookshelf;
 
+import android.content.Intent;
 import android.os.AsyncTask;
-import android.view.View;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -15,17 +15,20 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-public class BookFetch extends AsyncTask<String, Void, JSONArray> {
+public class BookFetch extends AsyncTask<String, Void, String> {
+
+
+    public AsyncResponse delegate = null;
 
     String data = "";
-    String dataParsed = "";
-    String singleParsed = "";
+
+    public BookFetch (AsyncResponse delegate){
+        this.delegate = delegate;
+    }
 
 
     @Override
-    protected JSONArray doInBackground(String... strings){
-
-        JSONArray resultArray = null;
+    protected String doInBackground(String... strings){
 
         try {
             URL url = new URL("https://kamorris.com/lab/cis3515/search.php?term=search_term");
@@ -40,6 +43,9 @@ public class BookFetch extends AsyncTask<String, Void, JSONArray> {
                 data = data + line;
             }
 
+
+            /* MIGHT NEED IN MAIN
+            JSONArray resultArray = null;
             resultArray = new JSONArray(data);
 
             for (int i = 0; i < resultArray.length(); i++){
@@ -50,22 +56,26 @@ public class BookFetch extends AsyncTask<String, Void, JSONArray> {
                                 "CoverURL: " + object.get("cover_url") + "\n";
                 dataParsed = dataParsed + singleParsed + "\n";
             }
+            */
+
 
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
         }
         System.out.println(data);
-        System.out.println(dataParsed);
-        return resultArray;
+        return data;
     }
 
-    @Override
-    protected void onPostExecute(JSONArray result) {
-        super.onPostExecute(result);
+
+    protected void onPostExecute(String result) {
+        delegate.processFinish(result);
+
+    }
+
+    public interface AsyncResponse{
+        void processFinish(String jsonString);
     }
 
 }

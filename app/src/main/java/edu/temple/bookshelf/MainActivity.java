@@ -5,9 +5,13 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity implements book_list.BookListFragmentInterface{
 
@@ -26,11 +30,6 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
         setContentView(R.layout.activity_main);
 
         /*
-        Intent intent = new Intent(MainActivity.this, BookSearchActivity.class);
-        startActivity(intent);
-         */
-
-        /*
         String[] titles = getResources().getStringArray(R.array.titles);
         String[] authors = getResources().getStringArray(R.array.authors);
 
@@ -45,12 +44,13 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
                 .commit();
          */
 
+        //Implement Search Button
         Button searchbutton = findViewById(R.id.searchbutton);
         searchbutton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, BookSearchActivity.class);
-                startActivity(intent);
+                startActivityForResult(intent, 1);
             }
         });
 
@@ -68,6 +68,21 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
         }
          */
     }
+
+    //Get the JSON String Result from the JSON Request to URL
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1) {
+            if(resultCode == RESULT_OK) {
+                String jsonString = data.getStringExtra("jsonArray");
+                System.out.println(jsonString);
+            }
+        }
+    }
+
+
+
+
 
     @Override
     public void itemClicked(int position){

@@ -11,7 +11,13 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 
+import org.json.JSONArray;
+
+import java.util.concurrent.ExecutionException;
+
 public class BookSearchActivity extends AppCompatActivity {
+
+    String returned = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,10 +42,25 @@ public class BookSearchActivity extends AppCompatActivity {
         search.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                BookFetch process = new BookFetch();
-                process.execute();
-                Intent resulted = new Intent(BookSearchActivity.this, MainActivity.class);
-                finish();
+
+                BookFetch asyncTask = (BookFetch) new BookFetch(new BookFetch.AsyncResponse(){
+                    @Override
+                    public void processFinish(String array) {
+                        returned = array;
+                    }
+                }).execute();
+
+                try {
+                    asyncTask.get();
+                    Intent resulted = new Intent();
+                    resulted.putExtra("jsonArray", returned);
+                    setResult(RESULT_OK, resulted);
+                    finish();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
