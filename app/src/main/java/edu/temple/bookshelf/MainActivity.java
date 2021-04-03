@@ -1,14 +1,13 @@
 package edu.temple.bookshelf;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
-import android.content.res.Configuration;
+import android.content.Intent;
 import android.os.Bundle;
-
-import java.util.ArrayList;
+import android.view.View;
+import android.widget.Button;
 
 public class MainActivity extends AppCompatActivity implements book_list.BookListFragmentInterface{
 
@@ -26,6 +25,10 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        /*
+        Intent intent = new Intent(MainActivity.this, BookSearchActivity.class);
+        startActivity(intent);
+         */
 
         /*
         String[] titles = getResources().getStringArray(R.array.titles);
@@ -42,10 +45,20 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
                 .commit();
          */
 
+        Button searchbutton = findViewById(R.id.searchbutton);
+        searchbutton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, BookSearchActivity.class);
+                startActivity(intent);
+            }
+        });
+
         exists = findViewById(R.id.container2) != null;
 
-        bookList = new BookList();
+        //bookList = new BookList();
 
+        /*
         //Find out a method to make it so prevpos isnt defaulted to 0
         if (exists) {
             getSupportFragmentManager()
@@ -53,6 +66,7 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
                     .replace(R.id.container2, BookDetailsFragment.newInstance(bookList.get(prevPos)))
                     .commit();
         }
+         */
     }
 
     @Override
@@ -67,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
         } else {
             getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.container2, BookDetailsFragment.newInstance(bookList.get(position)))
+                    .replace(R.id.container1, BookDetailsFragment.newInstance(bookList.get(position)))
                     .commit();
         }
         prevPos = position;
