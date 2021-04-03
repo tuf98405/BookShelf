@@ -1,6 +1,7 @@
 package edu.temple.bookshelf;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
@@ -18,19 +19,15 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
 
     BookDetailsFragment bookDetailsFragment;
     boolean exists;
-    boolean selected;
-    int prevpos;
+    static int prevPos;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        exists = findViewById(R.id.container2) != null;
 
-
-        bookList = new BookList();
-
+        /*
         String[] titles = getResources().getStringArray(R.array.titles);
         String[] authors = getResources().getStringArray(R.array.authors);
 
@@ -38,36 +35,29 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
             bookList.add(new Book(titles[i], authors[i]));
         }
 
+        //This is for populating the list with the books
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.container, bookListFragment.newInstance(bookList))
+                .commit();
+         */
 
-        if (selected){
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.container, bookDetailsFragment.newInstance(bookList.get(prevpos)))
-                    .commit();
-        }else {
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.container, bookListFragment.newInstance(bookList))
-                    .commit();
-            selected = false;
-        }
+        exists = findViewById(R.id.container2) != null;
 
+        bookList = new BookList();
 
+        //Find out a method to make it so prevpos isnt defaulted to 0
         if (exists) {
-            bookDetailsFragment = new BookDetailsFragment();
-
-
             getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.container2, bookDetailsFragment)
+                    .replace(R.id.container2, BookDetailsFragment.newInstance(bookList.get(prevPos)))
                     .commit();
         }
     }
 
     @Override
     public void itemClicked(int position){
-        selected = true;
-        prevpos = position;
+        System.out.println(exists);
         if (!exists){
             getSupportFragmentManager()
                     .beginTransaction()
@@ -75,8 +65,11 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
                     .addToBackStack(null)
                     .commit();
         } else {
-            bookDetailsFragment.changeBook(bookList.get(position));
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.container2, BookDetailsFragment.newInstance(bookList.get(position)))
+                    .commit();
         }
-
+        prevPos = position;
     }
 }
