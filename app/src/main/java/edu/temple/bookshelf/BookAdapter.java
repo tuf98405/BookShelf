@@ -47,12 +47,13 @@ public class BookAdapter extends ArrayAdapter {
 
         if (convertView == null) {
             textView = new TextView(parent.getContext());
-            textView.setTextSize(40);
+            textView.setTextSize(20);
         } else {
             textView = (TextView) convertView;
         }
 
-        textView.setText(((Book)(getItem(position))).getTitle());
+        //Search for spannable string maybe
+        textView.setText(((Book)(getItem(position))).getTitle() + "\n" + ((Book)(getItem(position))).getAuthor());
         return textView;
     }
 }
