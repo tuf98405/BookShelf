@@ -19,7 +19,7 @@
         android:translationY="105dp"></EditText>
 
     <Button
-        android:id="@+id/button2"
+        android:id="@+id/search"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Search"
@@ -27,7 +27,7 @@
         android:translationY="180dp" />
 
     <Button
-        android:id="@+id/button3"
+        android:id="@+id/cancel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Cancel"
@@ -35,7 +35,7 @@
         android:translationY="180dp" />
 
     <TextView
-        android:id="@+id/textView2"
+        android:id="@+id/dialogtitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Search"
