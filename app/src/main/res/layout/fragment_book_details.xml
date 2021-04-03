@@ -9,18 +9,18 @@
     <TextView
         android:id="@+id/Title"
         android:layout_width="wrap_content"
-        android:layout_height="15dp"
+        android:layout_height="30dp"
         app:layout_constraintBottom_toTopOf="@+id/Author"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.155"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.914" />
+        app:layout_constraintVertical_bias="0.957" />
 
     <TextView
         android:id="@+id/Author"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="30dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.155"
@@ -30,11 +30,12 @@
 
     <ImageView
         android:id="@+id/bookimage"
-        android:layout_width="355dp"
-        android:layout_height="365dp"
-        android:layout_marginTop="40dp"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.346"
         tools:src="@tools:sample/avatars" />
 </androidx.constraintlayout.widget.ConstraintLayout>

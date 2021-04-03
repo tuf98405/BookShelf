@@ -41,6 +41,10 @@ public class Book implements Parcelable {
         this.title = title;
     }
 
+    public String getCoverURL() {
+        return coverURL;
+    }
+
     public String getAuthor() {
         return author;
     }

@@ -19,10 +19,11 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
     FragmentManager fragmentManager;
     FragmentTransaction fragmentTransaction;
     book_list bookListFragment;
-    BookList bookList = new BookList();
+    static BookList bookList = new BookList();
 
     BookDetailsFragment bookDetailsFragment;
     boolean exists;
+    static boolean flag;
     static int prevPos;
     String jsonString = "";
 
@@ -30,16 +31,6 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-
-
-        //This is for populating the list with the books
-        if (bookList != null){
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.container1, bookListFragment.newInstance(bookList))
-                    .commit();
-        }
 
 
         //Implement Search Button
@@ -54,17 +45,29 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
 
         exists = findViewById(R.id.container2) != null;
 
-        //bookList = new BookList();
+        //This is for populating the list with the books
+        if (bookList != null){
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.container1, bookListFragment.newInstance(bookList))
+                    .commit();
+        }
 
-        /*
-        //Find out a method to make it so prevpos isnt defaulted to 0
-        if (exists) {
+        if (flag = true && bookList.size() != 0 && !exists){
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.container1, BookDetailsFragment.newInstance(bookList.get(prevPos)))
+                    .addToBackStack(null)
+                    .commit();
+        }
+
+
+        if (exists && bookList.size() != 0) {
             getSupportFragmentManager()
                     .beginTransaction()
                     .replace(R.id.container2, BookDetailsFragment.newInstance(bookList.get(prevPos)))
                     .commit();
         }
-         */
     }
 
     //Get the JSON String Result from the JSON Request to URL
@@ -73,9 +76,7 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
         if (requestCode == 1) {
             if(resultCode == RESULT_OK) {
                 jsonString = data.getStringExtra("jsonArray");
-                String userInput = data.getStringExtra("userInput");
-                System.out.println(jsonString);
-                System.out.println(userInput);
+                String userInput = data.getStringExtra("userInput").toLowerCase();
 
                 //Add the JSON String to bookList
                 try {
@@ -89,7 +90,7 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
 
                     for (int i = 0; i < resultArray.length(); i++){
                         JSONObject object = (JSONObject) resultArray.get(i);
-                        if (object.get("title").toString().contains(userInput) || object.get("author").toString().contains(userInput)){
+                        if (object.get("title").toString().toLowerCase().contains(userInput) || object.get("author").toString().toLowerCase().contains(userInput)){
                             System.out.println((String)object.get("title"));
                             System.out.println((String)object.get("author"));
                             System.out.println((String)object.get("id"));
@@ -102,6 +103,7 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
                             .beginTransaction()
                             .replace(R.id.container1, bookListFragment.newInstance(bookList))
                             .commit();
+                    flag = false;
                 } catch (JSONException e) {
                     e.printStackTrace();
                     System.out.println("JSON String was Null");
@@ -110,8 +112,6 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
             }
         }
     }
-
-
 
 
 
@@ -131,5 +131,6 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
                     .commit();
         }
         prevPos = position;
+        flag = true;
     }
 }
