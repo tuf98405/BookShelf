@@ -27,7 +27,7 @@ public class BookSearchActivity extends AppCompatActivity {
 
 
 
-        //Cancel button
+        //Cancel button just closes the activity
         Button cancel = findViewById(R.id.cancel);
         cancel.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -37,7 +37,7 @@ public class BookSearchActivity extends AppCompatActivity {
         });
 
 
-        //Search button
+        //Search button sends JSON request, retrieves string, then sends to main activity
         Button search = findViewById(R.id.search);
         EditText inputField = findViewById(R.id.editable);
         search.setOnClickListener(new View.OnClickListener() {

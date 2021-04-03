@@ -53,6 +53,7 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
                     .commit();
         }
 
+        //Checks to see if user had previously selected a book
         if (flag = true && bookList.size() != 0 && !exists){
             getSupportFragmentManager()
                     .beginTransaction()
@@ -61,7 +62,7 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
                     .commit();
         }
 
-
+        //Creates second view if in landscape. Has bug with prevPos
         if (exists && bookList.size() != 0) {
             getSupportFragmentManager()
                     .beginTransaction()
@@ -88,14 +89,20 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
                     }
                     catch (Exception e){};
 
-                    for (int i = 0; i < resultArray.length(); i++){
-                        JSONObject object = (JSONObject) resultArray.get(i);
-                        if (object.get("title").toString().toLowerCase().contains(userInput) || object.get("author").toString().toLowerCase().contains(userInput)){
-                            System.out.println((String)object.get("title"));
-                            System.out.println((String)object.get("author"));
-                            System.out.println((String)object.get("id"));
-                            System.out.println((String)object.get("cover_url"));
-                            bookList.add(new Book((String)object.get("title"), (String)object.get("author"), Integer.parseInt(object.get("id").toString()), (String)object.get("cover_url")));
+                    //Checks if user input is blank. if so, returns all book objects
+                    if (userInput == "") {
+                        for (int i = 0; i < resultArray.length(); i++){
+                            JSONObject object = (JSONObject) resultArray.get(i);
+                            if (object.get("title").toString().toLowerCase().contains(userInput) || object.get("author").toString().toLowerCase().contains(userInput)){
+                                bookList.add(new Book((String)object.get("title"), (String)object.get("author"), Integer.parseInt(object.get("id").toString()), (String)object.get("cover_url")));
+                            }
+                        }
+                    } else{
+                        for (int i = 0; i < resultArray.length(); i++){
+                            JSONObject object = (JSONObject) resultArray.get(i);
+                            if (object.get("title").toString().toLowerCase().contains(userInput) || object.get("author").toString().toLowerCase().contains(userInput)){
+                                bookList.add(new Book((String)object.get("title"), (String)object.get("author"), Integer.parseInt(object.get("id").toString()), (String)object.get("cover_url")));
+                            }
                         }
                     }
 
