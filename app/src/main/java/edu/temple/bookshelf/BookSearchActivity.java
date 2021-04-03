@@ -39,6 +39,7 @@ public class BookSearchActivity extends AppCompatActivity {
 
         //Search button
         Button search = findViewById(R.id.search);
+        EditText inputField = findViewById(R.id.editable);
         search.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -47,20 +48,16 @@ public class BookSearchActivity extends AppCompatActivity {
                     @Override
                     public void processFinish(String array) {
                         returned = array;
+                        String input = inputField.getText().toString();
+
+                        Intent resulted = new Intent();
+                        resulted.putExtra("jsonArray", returned);
+                        resulted.putExtra("userInput", input);
+                        setResult(RESULT_OK, resulted);
+
+                        finish();
                     }
                 }).execute();
-
-                try {
-                    asyncTask.get();
-                    Intent resulted = new Intent();
-                    resulted.putExtra("jsonArray", returned);
-                    setResult(RESULT_OK, resulted);
-                    finish();
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
             }
         });
 

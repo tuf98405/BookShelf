@@ -46,6 +46,10 @@ public class BookList implements Parcelable {
         return bookList;
     }
 
+    public void emptyList() {
+        bookList.clear();
+    }
+
     @Override
     public int describeContents() {
         return 0;

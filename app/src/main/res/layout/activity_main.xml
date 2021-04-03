@@ -9,9 +9,9 @@
 
     <FrameLayout
         android:id="@+id/container1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:translationY="75dp" />
+        android:layout_width="match_parent"
+        android:layout_height="630dp"
+        android:translationY="100dp" />
 
     <Button
         android:id="@+id/searchbutton"

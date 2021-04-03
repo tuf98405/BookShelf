@@ -7,6 +7,7 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.w3c.dom.Text;
@@ -19,6 +20,7 @@ public class BookDetailsFragment extends Fragment {
 
     TextView title;
     TextView author;
+    ImageView bookurl;
 
     public BookDetailsFragment() {
         // Required empty public constructor
@@ -51,6 +53,7 @@ public class BookDetailsFragment extends Fragment {
         if (layout != null){
             title = layout.findViewById(R.id.Title);
             author = layout.findViewById(R.id.Author);
+            bookurl = layout.findViewById(R.id.bookimage);
         }
 
         if (book != null){

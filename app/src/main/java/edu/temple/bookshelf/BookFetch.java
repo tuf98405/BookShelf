@@ -31,7 +31,7 @@ public class BookFetch extends AsyncTask<String, Void, String> {
     protected String doInBackground(String... strings){
 
         try {
-            URL url = new URL("https://kamorris.com/lab/cis3515/search.php?term=search_term");
+            URL url = new URL("https://kamorris.com/lab/cis3515/search.php?");
 
             HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
             InputStream inputStream = urlConnection.getInputStream();
@@ -64,7 +64,6 @@ public class BookFetch extends AsyncTask<String, Void, String> {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.out.println(data);
         return data;
     }
 
