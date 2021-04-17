@@ -103,7 +103,6 @@ public class ControlFragment extends Fragment {
         IntentFilter filter = new IntentFilter();
         filter.addAction("PLAYING_AUDIO");
         filter.addAction("SET_SEEKBAR");
-        filter.addAction("SET_HEADER");
         getActivity().registerReceiver(receiver, filter);
 
 
