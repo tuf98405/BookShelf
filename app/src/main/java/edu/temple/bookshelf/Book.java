@@ -55,6 +55,8 @@ public class Book implements Parcelable {
         return title;
     }
 
+    public int getId() { return id; }
+
     public int getDuration() { return duration; }
 
     @Override

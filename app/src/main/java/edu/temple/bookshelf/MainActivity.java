@@ -1,6 +1,7 @@
 package edu.temple.bookshelf;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
@@ -17,6 +18,8 @@ import android.os.IBinder;
 import android.provider.MediaStore;
 import android.view.View;
 import android.widget.Button;
+import android.widget.SeekBar;
+import android.widget.TextView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -24,13 +27,14 @@ import org.json.JSONObject;
 
 import edu.temple.audiobookplayer.AudiobookService;
 
-public class MainActivity extends AppCompatActivity implements book_list.BookListFragmentInterface{
+public class MainActivity extends AppCompatActivity implements book_list.BookListFragmentInterface, ControlFragment.onDataPass{
 
     FragmentManager fragmentManager;
     FragmentTransaction fragmentTransaction;
     book_list bookListFragment;
     static BookList bookList = new BookList();
 
+    // Changing Views and such
     BookDetailsFragment bookDetailsFragment;
     boolean exists;
     static boolean flag;
@@ -41,6 +45,10 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
     private AudiobookService.MediaControlBinder AudioService;
     private MainActivityViewModel mViewModel;
 
+    // Flags for Button Presses from Control Fragment
+    boolean playPress;
+    boolean pausePress;
+    boolean stopPress;
 
 
     @Override
@@ -179,9 +187,16 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
 
 
 
-    private void playBook(){
-        if (AudioService.isPlaying() == false){
-            AudioService.play(4);
+    private void playBook(int id){
+        if (AudioService!= null){
+            if (AudioService.isPlaying() != true){
+                AudioService.play(id);
+            }
+
+            String headerString = bookList.get(prevPos).getTitle() + " by " + bookList.get(prevPos).getAuthor();
+            Intent intent = new Intent("PLAYING_AUDIO");
+            intent.putExtra("Header",headerString);
+            sendBroadcast(intent);
         }
     }
 
@@ -211,5 +226,22 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
     private void bindService(){
         Intent serviceIntent = new Intent(this, AudiobookService.class);
         bindService(serviceIntent, mViewModel.getServiceConnection(), Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    public void onDataPass(boolean pause, boolean play, boolean stop) {
+        pausePress = pause;
+        playPress = play;
+        stopPress = stop;
+
+        if (play == true) {
+            playBook(bookList.get(prevPos).getId());
+        }
+        if (stop == true){
+            AudioService.stop();
+        }
+        if (pause == true){
+            AudioService.pause();
+        }
     }
 }
