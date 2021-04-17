@@ -12,6 +12,18 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <FrameLayout
+        android:id="@+id/audioControlLayout"
+        android:layout_width="match_parent"
+        android:layout_height="75dp"
+        android:translationY="60dp"></FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/listLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:translationY="150dp"></FrameLayout>
+
     <Button
         android:id="@+id/searchbutton"
         android:layout_width="match_parent"

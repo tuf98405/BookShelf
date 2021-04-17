@@ -3,16 +3,26 @@ package edu.temple.bookshelf;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProvider;
 
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.provider.MediaStore;
 import android.view.View;
 import android.widget.Button;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import edu.temple.audiobookplayer.AudiobookService;
 
 public class MainActivity extends AppCompatActivity implements book_list.BookListFragmentInterface{
 
@@ -27,10 +37,37 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
     static int prevPos;
     String jsonString = "";
 
+    // Service Variables
+    private AudiobookService.MediaControlBinder AudioService;
+    private MainActivityViewModel mViewModel;
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Connect to Audiobook Service
+        mViewModel = new ViewModelProvider(this).get(MainActivityViewModel.class);
+        mViewModel.getBinder().observe(this, new Observer<AudiobookService.MediaControlBinder>() {
+            @Override
+            public void onChanged(AudiobookService.MediaControlBinder mediaControlBinder) {
+                if (mediaControlBinder != null){
+                    AudioService = mediaControlBinder;
+                }
+                else{
+                    AudioService = null;
+                }
+            }
+        });
+
+
+        // Just inserts the Audio Controls to the audioControlLayout everytime
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.audioControlLayout, ControlFragment.class, null)
+                .commit();
 
 
         //Implement Search Button
@@ -49,7 +86,7 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
         if (bookList != null){
             getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.container1, bookListFragment.newInstance(bookList))
+                    .replace(R.id.listLayout, bookListFragment.newInstance(bookList))
                     .commit();
         }
 
@@ -57,7 +94,7 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
         if (flag = true && bookList.size() != 0 && !exists){
             getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.container1, BookDetailsFragment.newInstance(bookList.get(prevPos)))
+                    .replace(R.id.listLayout, BookDetailsFragment.newInstance(bookList.get(prevPos)))
                     .addToBackStack(null)
                     .commit();
         }
@@ -108,7 +145,7 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
 
                     getSupportFragmentManager()
                             .beginTransaction()
-                            .replace(R.id.container1, bookListFragment.newInstance(bookList))
+                            .replace(R.id.listLayout, bookListFragment.newInstance(bookList))
                             .commit();
                     flag = false;
                 } catch (JSONException e) {
@@ -120,15 +157,13 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
         }
     }
 
-
-
     @Override
     public void itemClicked(int position){
         System.out.println(exists);
         if (!exists){
             getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.container1, BookDetailsFragment.newInstance(bookList.get(position)))
+                    .replace(R.id.listLayout, BookDetailsFragment.newInstance(bookList.get(position)))
                     .addToBackStack(null)
                     .commit();
         } else {
@@ -139,5 +174,42 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
         }
         prevPos = position;
         flag = true;
+    }
+
+
+
+
+    private void playBook(){
+        if (AudioService.isPlaying() == false){
+            AudioService.play(4);
+        }
+    }
+
+
+    //Service Connection Methods
+    @Override
+    protected void onPause(){
+        super.onPause();
+        if(mViewModel.getBinder() != null){
+            unbindService((mViewModel.getServiceConnection()));
+        }
+    }
+
+    @Override
+    protected void onResume(){
+        super.onResume();
+        startService();
+    }
+
+    private void startService(){
+        Intent serviceIntent = new Intent(this, AudiobookService.class);
+        startService(serviceIntent);
+
+        bindService();
+    }
+
+    private void bindService(){
+        Intent serviceIntent = new Intent(this, AudiobookService.class);
+        bindService(serviceIntent, mViewModel.getServiceConnection(), Context.BIND_AUTO_CREATE);
     }
 }

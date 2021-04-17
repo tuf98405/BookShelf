@@ -3,24 +3,42 @@
     xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
     android:layout_height="match_parent">
     android:orientation="horizontal">
-    
+
     <FrameLayout
         android:id="@+id/container1"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1">
 
+        <FrameLayout
+            android:id="@+id/audioControlLayout"
+            android:layout_width="match_parent"
+            android:layout_height="75dp"
+            android:translationY="50dp"></FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/listLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:translationY="125dp"></FrameLayout>
+
         <Button
             android:id="@+id/searchbutton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Button" />
+
     </FrameLayout>
 
-    <FrameLayout
-        android:id="@+id/container2"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="3"/>
+    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/scroll"
+        android:layout_width="500dp"
+        android:layout_height="match_parent">
+        <FrameLayout
+            android:id="@+id/container2"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="3"/>
+    </ScrollView>
 
 </LinearLayout>
