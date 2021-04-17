@@ -18,6 +18,7 @@ import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import androidx.core.text.PrecomputedTextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.MutableLiveData;
 
@@ -58,9 +59,25 @@ public class ControlFragment extends Fragment {
         @Override
         public void onReceive(Context context, Intent intent) {
             Bundle bundle = intent.getExtras();
-            String headerString = bundle.getString("Header");
-            TextView header = getView().findViewById(R.id.header);
-            header.setText("Now Playing: " + headerString);
+
+            switch (intent.getAction()){
+                case "PLAYING_AUDIO":
+                    String headerText = bundle.getString("Header");
+                    if (headerText != null){
+                        TextView header = getView().findViewById(R.id.header);
+                        header.setText("Now Playing: " + headerText);
+                    }
+                    break;
+                case "SET_SEEKBAR":
+                    int progress = bundle.getInt("progress");
+                    int duration = bundle.getInt("duration");
+                    System.out.println(progress);
+                    SeekBar seekBar = getView().findViewById(R.id.seekBar);
+
+                    seekBar.setMax(duration);
+                    seekBar.setProgress(progress);
+                    break;
+            }
 
         }
     };
@@ -82,7 +99,9 @@ public class ControlFragment extends Fragment {
 
         View layout = inflater.inflate(R.layout.fragment_control, container, false);
 
-        IntentFilter filter = new IntentFilter("PLAYING_AUDIO");
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("PLAYING_AUDIO");
+        filter.addAction("SET_SEEKBAR");
         getActivity().registerReceiver(receiver, filter);
 
 
@@ -95,12 +114,12 @@ public class ControlFragment extends Fragment {
         Button stopButton = layout.findViewById(R.id.stop);
         SeekBar seekBar = layout.findViewById(R.id.seekBar);
 
-
+        // Set Listeners for the Buttons
         pauseButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 System.out.println("pause");
-                passData(true, false, false);
+                passButtons(true, false, false);
             }
         });
 
@@ -108,7 +127,7 @@ public class ControlFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 System.out.println("play");
-                passData(false, true, false);
+                passButtons(false, true, false);
             }
         });
 
@@ -116,9 +135,33 @@ public class ControlFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 System.out.println("stop");
-                passData(false, false, true);
+                passButtons(false, false, true);
             }
         });
+
+
+        // Set Listeners for SeekBar
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser == true){
+                    passSeekbar(progress);
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
+
+
 
         // Inflate the layout for this fragment
         return layout;
@@ -127,19 +170,26 @@ public class ControlFragment extends Fragment {
 
     // Pass data between activity and fragment
     onDataPass pressedButtons;
+    onDataPass passSeekbar;
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
         pressedButtons = (onDataPass) context;
+        passSeekbar = (onDataPass) context;
     }
 
     public interface onDataPass {
-        public void onDataPass(boolean pause, boolean play, boolean stop);
+        public void onButtonPass(boolean pause, boolean play, boolean stop);
+        public void onSeekbarPass(int progress);
     }
 
-    public void passData(boolean pause, boolean play, boolean stop){
-        pressedButtons.onDataPass(pause, play, stop);
+    public void passButtons(boolean pause, boolean play, boolean stop){
+        pressedButtons.onButtonPass(pause, play, stop);
+    }
+
+    public void passSeekbar(int progress){
+        pressedButtons.onSeekbarPass(progress);
     }
 
 }

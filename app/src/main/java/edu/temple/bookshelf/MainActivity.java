@@ -14,7 +14,10 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
+import android.os.Message;
 import android.provider.MediaStore;
 import android.view.View;
 import android.widget.Button;
@@ -50,11 +53,22 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
     boolean pausePress;
     boolean stopPress;
 
+    // Extra Strings
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        if (null == savedInstanceState) {
+            // Just inserts the Audio Controls to the audioControlLayout everytime
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.audioControlLayout, ControlFragment.class, null)
+                    .commit();
+        }
 
         // Connect to Audiobook Service
         mViewModel = new ViewModelProvider(this).get(MainActivityViewModel.class);
@@ -63,6 +77,7 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
             public void onChanged(AudiobookService.MediaControlBinder mediaControlBinder) {
                 if (mediaControlBinder != null){
                     AudioService = mediaControlBinder;
+                    AudioService.setProgressHandler(handler);
                 }
                 else{
                     AudioService = null;
@@ -70,12 +85,6 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
             }
         });
 
-
-        // Just inserts the Audio Controls to the audioControlLayout everytime
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.audioControlLayout, ControlFragment.class, null)
-                .commit();
 
 
         //Implement Search Button
@@ -139,14 +148,14 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
                         for (int i = 0; i < resultArray.length(); i++){
                             JSONObject object = (JSONObject) resultArray.get(i);
                             if (object.get("title").toString().toLowerCase().contains(userInput) || object.get("author").toString().toLowerCase().contains(userInput)){
-                                bookList.add(new Book((String)object.get("title"), (String)object.get("author"), Integer.parseInt(object.get("id").toString()), (String)object.get("cover_url")));
+                                bookList.add(new Book((String)object.get("title"), (String)object.get("author"), Integer.parseInt(object.get("id").toString()), (String)object.get("cover_url"), Integer.parseInt(object.get("duration").toString())));
                             }
                         }
                     } else{
                         for (int i = 0; i < resultArray.length(); i++){
                             JSONObject object = (JSONObject) resultArray.get(i);
                             if (object.get("title").toString().toLowerCase().contains(userInput) || object.get("author").toString().toLowerCase().contains(userInput)){
-                                bookList.add(new Book((String)object.get("title"), (String)object.get("author"), Integer.parseInt(object.get("id").toString()), (String)object.get("cover_url")));
+                                bookList.add(new Book((String)object.get("title"), (String)object.get("author"), Integer.parseInt(object.get("id").toString()), (String)object.get("cover_url"), Integer.parseInt(object.get("duration").toString())));
                             }
                         }
                     }
@@ -186,22 +195,47 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
 
 
 
-
+    // Plays Audiobook if nothing is playing
     private void playBook(int id){
         if (AudioService!= null){
             if (AudioService.isPlaying() != true){
                 AudioService.play(id);
-            }
 
-            String headerString = bookList.get(prevPos).getTitle() + " by " + bookList.get(prevPos).getAuthor();
-            Intent intent = new Intent("PLAYING_AUDIO");
-            intent.putExtra("Header",headerString);
-            sendBroadcast(intent);
+                String headerString = bookList.get(prevPos).getTitle() + " by " + bookList.get(prevPos).getAuthor();
+                Intent intent = new Intent("PLAYING_AUDIO");
+                intent.putExtra("Header",headerString);
+                sendBroadcast(intent);
+            }
         }
     }
 
+    // Updates Audiobook to seekbar Position set by user
+    private void updateProgress(int progress){
+        if (AudioService != null){
+            AudioService.seekTo(progress);
+        }
+    }
 
-    //Service Connection Methods
+    private void setSeekbar(int progress, int duration){
+        Intent intent = new Intent("SET_SEEKBAR");
+        intent.putExtra("progress", progress);
+        intent.putExtra("duration", duration);
+        sendBroadcast(intent);
+    }
+
+    // Loops and makes sure Seekbar is updated with Audiobook Progress
+    private Handler handler = new Handler(Looper.getMainLooper()) {
+        public void handleMessage(Message msg){
+            AudiobookService.BookProgress bookProgress = (AudiobookService.BookProgress) msg.obj;
+            if (bookProgress != null){
+                System.out.println(bookProgress.getProgress());
+                setSeekbar(bookProgress.getProgress(), bookList.get(prevPos).getDuration());
+            }
+        }
+    };
+
+
+    //Service Connection Methods for maintaining Audio Playback
     @Override
     protected void onPause(){
         super.onPause();
@@ -228,14 +262,17 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
         bindService(serviceIntent, mViewModel.getServiceConnection(), Context.BIND_AUTO_CREATE);
     }
 
+    // Passing Data between Audio Controls Fragment and services
     @Override
-    public void onDataPass(boolean pause, boolean play, boolean stop) {
+    public void onButtonPass(boolean pause, boolean play, boolean stop) {
         pausePress = pause;
         playPress = play;
         stopPress = stop;
 
         if (play == true) {
-            playBook(bookList.get(prevPos).getId());
+            if (bookList.size() != 0){
+                playBook(bookList.get(prevPos).getId());
+            }
         }
         if (stop == true){
             AudioService.stop();
@@ -243,5 +280,10 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
         if (pause == true){
             AudioService.pause();
         }
+    }
+
+    @Override
+    public void onSeekbarPass(int progress) {
+        updateProgress(progress);
     }
 }

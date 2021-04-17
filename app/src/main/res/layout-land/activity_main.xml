@@ -13,20 +13,20 @@
         <FrameLayout
             android:id="@+id/audioControlLayout"
             android:layout_width="match_parent"
-            android:layout_height="75dp"
+            android:layout_height="125dp"
             android:translationY="50dp"></FrameLayout>
 
         <FrameLayout
             android:id="@+id/listLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:translationY="125dp"></FrameLayout>
+            android:translationY="175dp"></FrameLayout>
 
         <Button
             android:id="@+id/searchbutton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Button" />
+            android:text="Search" />
 
     </FrameLayout>
 
