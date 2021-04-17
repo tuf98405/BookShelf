@@ -23,6 +23,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -207,6 +208,10 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
                 intent.putExtra("Header",headerString);
                 sendBroadcast(intent);
             }
+            else{
+                Toast toast = Toast.makeText(this, "Pause or Stop before playing a new Audiobook", Toast.LENGTH_SHORT);
+                toast.show();
+            }
         }
     }
 
@@ -231,7 +236,6 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
         public void handleMessage(Message msg){
             AudiobookService.BookProgress bookProgress = (AudiobookService.BookProgress) msg.obj;
             if (bookProgress != null){
-                System.out.println(bookProgress.getProgress());
                 setSeekbar(bookProgress.getProgress(), bookList.get(prevPos).getDuration());
             }
         }

@@ -72,7 +72,6 @@ public class ControlFragment extends Fragment {
                 case "SET_SEEKBAR":
                     int progress = bundle.getInt("progress");
                     int duration = bundle.getInt("duration");
-                    System.out.println(progress);
                     SeekBar seekBar = getView().findViewById(R.id.seekBar);
 
                     seekBar.setMax(duration);
