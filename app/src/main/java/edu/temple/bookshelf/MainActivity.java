@@ -174,6 +174,7 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
         }
     }
 
+    // Sets bookdetails for selected book from searched list
     @Override
     public void itemClicked(int position){
         System.out.println(exists);
@@ -216,12 +217,14 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
         }
     }
 
+    // Sets Seekbar depending on book progress only
     private void setSeekbar(int progress, int duration){
         Intent intent = new Intent("SET_SEEKBAR");
         intent.putExtra("progress", progress);
         intent.putExtra("duration", duration);
         sendBroadcast(intent);
     }
+
 
     // Loops and makes sure Seekbar is updated with Audiobook Progress
     private Handler handler = new Handler(Looper.getMainLooper()) {
@@ -263,6 +266,7 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
     }
 
     // Passing Data between Audio Controls Fragment and services
+    // For the Button Presses in Audio Controls
     @Override
     public void onButtonPass(boolean pause, boolean play, boolean stop) {
         pausePress = pause;
@@ -282,6 +286,7 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
         }
     }
 
+    // For the Seekbar User Updates
     @Override
     public void onSeekbarPass(int progress) {
         updateProgress(progress);

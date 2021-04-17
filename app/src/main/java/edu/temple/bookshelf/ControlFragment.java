@@ -55,6 +55,7 @@ public class ControlFragment extends Fragment {
         }
     }
 
+    // Receives updated information sent from Main regarding Book service
     BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -102,6 +103,7 @@ public class ControlFragment extends Fragment {
         IntentFilter filter = new IntentFilter();
         filter.addAction("PLAYING_AUDIO");
         filter.addAction("SET_SEEKBAR");
+        filter.addAction("SET_HEADER");
         getActivity().registerReceiver(receiver, filter);
 
 
@@ -114,7 +116,7 @@ public class ControlFragment extends Fragment {
         Button stopButton = layout.findViewById(R.id.stop);
         SeekBar seekBar = layout.findViewById(R.id.seekBar);
 
-        // Set Listeners for the Buttons
+        // Set Listeners for the Buttons. Each button passes set booleans for service in Main
         pauseButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -159,9 +161,6 @@ public class ControlFragment extends Fragment {
 
             }
         });
-
-
-
 
         // Inflate the layout for this fragment
         return layout;
