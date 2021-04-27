@@ -362,10 +362,11 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
         }
         else{
             try{
+                File file = new File(getApplicationContext().getFilesDir(), fileDataName);
+                writeToBookJSON(file, String.valueOf(playingBookId), String.valueOf(mp.getCurrentPosition()));
                 mp.reset();
                 mp.setDataSource(getApplicationContext().getFilesDir() + "/" + id + ".mp3");
                 mp.prepare();
-                File file = new File(getApplicationContext().getFilesDir(), fileDataName);
                 int seek = Integer.valueOf(getJsonValue(file, String.valueOf(id)));
                 if (seek != 0){
                     mp.seekTo(seek);
