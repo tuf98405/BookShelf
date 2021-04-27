@@ -410,6 +410,13 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
         public void run() {
             setSeekbar(mp.getCurrentPosition(), mp.getDuration());
             mSeekbarUpdateHandler.postDelayed(this, 50);
+
+            File file = new File(getApplicationContext().getFilesDir(), fileDataName);
+            try {
+                writeToBookJSON(file, String.valueOf(playingBookId), String.valueOf(mp.getCurrentPosition()));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     };
 
@@ -498,10 +505,11 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
             AudioService.pause();
             if (mp.isPlaying() == false){
                 mp.start();
+                mSeekbarUpdateHandler.post(mUpdateSeekbar);
             }else {
                 mp.pause();
+                mSeekbarUpdateHandler.removeCallbacks(mUpdateSeekbar);
             }
-            mSeekbarUpdateHandler.removeCallbacks(mUpdateSeekbar);
         }
     }
 
