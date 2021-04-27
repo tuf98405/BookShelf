@@ -19,6 +19,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.SeekBar;
@@ -28,6 +29,21 @@ import android.widget.Toast;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import edu.temple.audiobookplayer.AudiobookService;
 
@@ -54,14 +70,115 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
     boolean pausePress;
     boolean stopPress;
 
-    // Extra Strings
+    // Variables for Persistent Data
+    String fileDataName = "BookData.json";
+    boolean dataFileFlag = false;
 
+    FileReader fileReader = null;
+    FileWriter fileWriter = null;
+    BufferedWriter bufferedWriter = null;
+    BufferedReader bufferedReader = null;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Context context = getApplicationContext();
+
+        //JSONObject jsonFile = new JSONObject(data);
+
+        // Checks if Book Data exists
+        System.out.println("Files in directory");
+        String[] files = getApplicationContext().fileList();
+        File file = new File(context.getFilesDir(), fileDataName);
+        //file.delete();
+        for(int i = 0; i < files.length; i++){
+            System.out.println(files[i] + " and " + fileDataName);
+            if(files[i].equals(fileDataName)){
+                System.out.println("Book Data has been found");
+                dataFileFlag = true;
+            }
+            else{
+                dataFileFlag = false;
+            }
+        }
+
+        // If Book data exists, then use it. If not, then create it
+        if (dataFileFlag != true){
+            try {
+                file.createNewFile();
+                fileWriter = new FileWriter(file.getAbsoluteFile());
+                bufferedWriter = new BufferedWriter(fileWriter);
+                bufferedWriter.write("{}");
+                bufferedWriter.close();
+
+                System.out.println("Book Data file has been created");
+            }
+            catch (IOException e) {
+                Log.e("Exception", "File write failed: " + e.toString());
+            }
+        }
+        else{
+            System.out.println("Book Data already exists. Using File for App");
+
+            JSONObject jsonFile = null;
+            try {
+                jsonFile = getBookJson(file);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            if(jsonFile == null){
+                System.out.println("Data file is null");
+            }
+            else{
+                System.out.println("Data file has been populated");
+
+
+
+                StringBuffer output = new StringBuffer();
+                String response = "Asdf";
+
+                try {
+                    fileReader = new FileReader(file.getAbsolutePath());
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+
+                bufferedReader = new BufferedReader(fileReader);
+
+                String line = "";
+                while (true){
+                    try {
+                        if (!((line = bufferedReader.readLine()) != null)) break;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    output.append(line + "\n");
+                }
+
+                response = output.toString();
+                try {
+                    bufferedReader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                System.out.println(output);
+
+                // Set Variables and all that here
+
+            }
+        }
+
+
+
+
+
+
 
         if (null == savedInstanceState) {
             // Just inserts the Audio Controls to the audioControlLayout everytime
@@ -193,12 +310,41 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
         }
         prevPos = position;
         flag = true;
+        File file = new File(getApplicationContext().getFilesDir() + "/" + fileDataName);
+        try {
+            writeToBookJSON(file, "prevPos", String.valueOf(position));
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
 
 
     // Plays Audiobook if nothing is playing
     private void playBook(int id){
+
+        boolean foundAudioBook = false;
+        String[] files = getApplicationContext().fileList();
+        for(int i = 0; i < files.length; i++){
+            if(files[i].equals(id + ".mp3")){
+                System.out.println("AudioBook has been found");
+                foundAudioBook = true;
+            }
+            else{
+                foundAudioBook = false;
+            }
+        }
+
+        if (foundAudioBook != true) {
+            System.out.println("AudioBook has not been found");
+            System.out.println("Attempting to Download...");
+            String path = getApplicationContext().getFilesDir().toString();
+            new AudioBookDownload().execute(String.valueOf(id), path);
+        }
+
+
         if (AudioService!= null){
             if (AudioService.isPlaying() != true){
                 AudioService.play(id);
@@ -295,4 +441,56 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
     public void onSeekbarPass(int progress) {
         updateProgress(progress);
     }
+
+
+    public JSONObject getBookJson(File file) throws IOException, JSONException {
+
+        StringBuffer output = new StringBuffer();
+        String response = "Asdf";
+
+        try {
+            fileReader = new FileReader(file.getAbsolutePath());
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        bufferedReader = new BufferedReader(fileReader);
+
+        String line = "";
+        while ((line = bufferedReader.readLine()) != null){
+            output.append(line + "\n");
+        }
+
+        response = output.toString();
+        bufferedReader.close();
+
+        JSONObject jsonFile = new JSONObject(response);
+
+        return jsonFile;
+    }
+
+    public void writeToBookJSON(File file, String id, String detail) throws IOException, JSONException {
+
+        JSONObject existingJson = getBookJson(file);
+
+        System.out.println("WriteToBookJson Details");
+        System.out.println(file);
+        System.out.println(id);
+        System.out.println(detail);
+
+        try {
+            existingJson.put(id, detail);
+        } catch(Exception e){
+        }
+
+        fileWriter = new FileWriter(file.getAbsoluteFile());
+        BufferedWriter bw = new BufferedWriter(fileWriter);
+        bw.write(existingJson.toString());
+        bw.close();
+
+        System.out.println(existingJson.toString());
+
+    }
+
+
 }
