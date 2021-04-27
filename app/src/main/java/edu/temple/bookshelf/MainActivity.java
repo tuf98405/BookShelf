@@ -12,6 +12,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -73,7 +74,13 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
     // Variables for Persistent Data
     String fileDataName = "BookData.json";
     boolean dataFileFlag = false;
+    MediaPlayer mp = new MediaPlayer();
+    boolean playing = false;
+    int playingBookId;
+    static int prog;
 
+
+    // JSON Readers Writers
     FileReader fileReader = null;
     FileWriter fileWriter = null;
     BufferedWriter bufferedWriter = null;
@@ -99,9 +106,6 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
             if(files[i].equals(fileDataName)){
                 System.out.println("Book Data has been found");
                 dataFileFlag = true;
-            }
-            else{
-                dataFileFlag = false;
             }
         }
 
@@ -325,15 +329,17 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
     // Plays Audiobook if nothing is playing
     private void playBook(int id){
 
+        if (AudioService.isPlaying() || mp.isPlaying()){
+            AudioService.stop();
+            mp.stop();
+        }
+
         boolean foundAudioBook = false;
         String[] files = getApplicationContext().fileList();
         for(int i = 0; i < files.length; i++){
             if(files[i].equals(id + ".mp3")){
                 System.out.println("AudioBook has been found");
                 foundAudioBook = true;
-            }
-            else{
-                foundAudioBook = false;
             }
         }
 
@@ -345,19 +351,33 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
         }
 
 
-        if (AudioService!= null){
+        if (AudioService!= null && foundAudioBook!= true){
             if (AudioService.isPlaying() != true){
                 AudioService.play(id);
+                playingBookId = id;
 
                 String headerString = bookList.get(prevPos).getTitle() + " by " + bookList.get(prevPos).getAuthor();
                 Intent intent = new Intent("PLAYING_AUDIO");
                 intent.putExtra("Header",headerString);
                 sendBroadcast(intent);
             }
-            else{
-                Toast toast = Toast.makeText(this, "Pause or Stop before playing a new Audiobook", Toast.LENGTH_SHORT);
-                toast.show();
+        }
+        else{
+            try{
+                mp.setDataSource(getApplicationContext().getFilesDir() + "/" + id + ".mp3");
+                mp.prepare();
+                mp.start();
+                playingBookId = id;
+
+                String headerString = bookList.get(prevPos).getTitle() + " by " + bookList.get(prevPos).getAuthor();
+                Intent intent = new Intent("PLAYING_AUDIO");
+                intent.putExtra("Header",headerString);
+                sendBroadcast(intent);
+
+            } catch(Exception e){
+                System.out.println(e);
             }
+
         }
     }
 
@@ -383,6 +403,7 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
             AudiobookService.BookProgress bookProgress = (AudiobookService.BookProgress) msg.obj;
             if (bookProgress != null){
                 setSeekbar(bookProgress.getProgress(), bookList.get(prevPos).getDuration());
+                prog = bookProgress.getProgress();
             }
         }
     };
@@ -425,13 +446,33 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
 
         if (play == true) {
             if (bookList.size() != 0){
-                playBook(bookList.get(prevPos).getId());
+                if (playingBookId != bookList.get(prevPos).getId()){
+                    playBook(bookList.get(prevPos).getId());
+                }
             }
         }
         if (stop == true){
+            File file = new File(getApplicationContext().getFilesDir(), fileDataName);
+            try {
+                writeToBookJSON(file, String.valueOf(playingBookId), "0");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             AudioService.stop();
+            playing = false;
+            prog = 0;
         }
         if (pause == true){
+            File file = new File(getApplicationContext().getFilesDir(), fileDataName);
+            try {
+                writeToBookJSON(file, String.valueOf(playingBookId), String.valueOf(prog));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            if (AudioService.isPlaying())
+                playing = false;
+            else
+                playing = true;
             AudioService.pause();
         }
     }
@@ -473,11 +514,6 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
 
         JSONObject existingJson = getBookJson(file);
 
-        System.out.println("WriteToBookJson Details");
-        System.out.println(file);
-        System.out.println(id);
-        System.out.println(detail);
-
         try {
             existingJson.put(id, detail);
         } catch(Exception e){
@@ -489,6 +525,21 @@ public class MainActivity extends AppCompatActivity implements book_list.BookLis
         bw.close();
 
         System.out.println(existingJson.toString());
+
+    }
+
+    public String getJsonValue(File file, String id) throws IOException, JSONException {
+
+        JSONObject existingJson = getBookJson(file);
+        String identifier = "";
+
+        try {
+            identifier = (String) existingJson.get(id);
+        } catch(Exception e){
+        }
+
+        System.out.println(identifier);
+        return identifier;
 
     }
 
